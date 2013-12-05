@@ -1,0 +1,181 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<title>sl</title> 
+	<meta content="width=device-width, minimum-scale=1, maximum-scale=1" name="viewport">
+  
+  	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css" />
+	
+	<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="jquery.jplayer.min.js"></script>
+	<script type="text/javascript" src="test.js"></script>
+	<script src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js"></script>
+	
+	<script type='text/javascript' src='jwplayer/jwplayer.js'></script>
+	
+	<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
+	
+	<script src="amplify.min.js"></script>
+
+<!-- 	<script type="text/javascript">
+		
+		//$(document).bind("mobileinit", function() {
+		//     $.mobile.page.prototype.options.addBackBtn = true;
+		 //});
+	</script> -->
+	
+ 	<script type="text/javascript">
+		$(document).ready(function(){
+			
+
+			$("#server").val(amplify.store( "configServer" ));
+			$("#port").val(amplify.store( "configPort" ));
+			$("#username").val(amplify.store( "configUsername" ));
+			$("#fpassword").val(amplify.store( "configPassword" ));
+			$("#password").val(amplify.store( "configPassword" ));
+			
+			testConnection();
+			
+			jQuery.validator.addMethod("complete_url", function(val, elem) {
+			    // if no url, don't do anything
+			    if (val.length == 0) { return true; }
+			 
+			    // if user has not entered http:// https:// or ftp:// assume they mean http://
+			    if(!/^(https?|ftp):\/\//i.test(val)) {
+				val = 'http://'+val; // set both the value
+				$(elem).val(val); // also update the form element
+			    }
+			    // now check if valid url
+			    // http://docs.jquery.com/Plugins/Validation/Methods/url
+			    // contributed by Scott Gonzalez: http://projects.scottsplayground.com/iri/
+			    return /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&amp;'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&amp;'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&amp;'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&amp;'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&amp;'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i.test(val);
+			});
+			
+			jQuery.validator.addMethod("proper_port", function(val, elem) {
+			    // if no url, don't do anything
+			    if (val.length == 0) { return true; }
+			 
+			    // if user has not entered http:// https:// or ftp:// assume they mean http://
+			    if(val < 1 || val > 65535) {
+				return false;
+			    }
+			    else{ return true; }
+			});
+			
+			$("#serverConfig").validate({
+				submitHandler: function(em) {
+					testConnection();
+				},
+				rules: {
+					"server": {
+					  required: true,
+					  url: "complete_url"
+					},
+					"port": {
+					  required: true,
+					  number: "proper_port"
+					},
+					"username": {
+					  required: true,
+					},
+					"fpassword": {
+					  required: true,
+					},
+					"password": {
+					  required: true,
+					  equalTo: "#fpassword"
+					}
+				}
+			});
+		});		
+	</script>	
+	</head> 
+<body> 
+
+<div data-role="page" id="homePage" data-theme="a" data-content-theme="a"> 
+
+	<div data-role="header">
+		<a href="#config" class='ui-btn-right' data-icon='gear' data-theme='a' data-iconpos='notext'>Config</a>
+		<h1>BerrySub</h1>
+		
+	</div><!-- /header -->
+
+	<div data-role="content">
+
+		<ul data-role="listview" data-inset="true" data-filter="true" id="list">
+
+	
+		</ul>
+		
+	</div><!-- /content -->
+	
+	<script type="text/javascript">  </script>
+	
+</div>
+
+<div data-role="page" id="viewer" data-theme="a" data-content-theme="a">
+	<div data-role="header">
+		<a id="viewerBack" href="" data-icon="arrow-l">Back</a> <a href="#homePage" class="ui-btn-right" data-icon="home" data-theme="a"  data-iconpos='notext'>Home</a>
+		<h1></h1>
+		
+	</div><!-- /header -->
+	
+	<div id="mediaDiv">
+		<div id="mediaplayer">No flash player support on this browser.</div>
+	</div>
+	
+</div>
+
+<div data-role="page" id="config" data-theme="a" data-content-theme="a">
+	
+	<div data-role="header">
+		<a id="homePage" href="#homePage" data-icon="arrow-l"  data-iconpos='notext'>Back</a>
+		<h1>Server Configuration</h1>
+		
+	</div><!-- /header -->
+	
+	<div data-role="content">
+		<form id="serverConfig">
+			
+			<div data-role="fieldcontain" style="text-align: center;" >							
+				<input type="url" name="server" class="required" id="server" value="" placeholder="server address" />
+				<label for="server" class="error" generated="true"></label>
+			</div>		
+		
+			<div data-role="fieldcontain" style="text-align: center;" >		
+				
+				<input type="text" name="port" class="required" id="port" value="" placeholder="port" />
+				<label for="port" class="error" generated="true"></label>
+			</div>	
+		
+		
+			<div data-role="fieldcontain" style="text-align: center;" >		
+				
+				<input type="text" name="username" class="required" id="username" value="" placeholder="username" />
+				<label for="username" class="error" generated="true"></label>
+			</div>	
+		
+		
+			<div data-role="fieldcontain" style="text-align: center;" >		
+				
+				<input type="password" name="fpassword" class="required" id="fpassword" value="" placeholder="password" />
+				<label for="fpassword" class="error" generated="true"></label>
+			</div>	
+		
+		
+			<div data-role="fieldcontain" style="text-align: center;" >		
+				
+				<input type="password" name="password" class="required" id="password" value="" placeholder="confirm password" />
+				<label for="password" class="error" generated="true"></label>
+			</div>	
+					
+			
+			<div data-theme="a" data-content-theme="a" style="text-align: center;" >
+				<button class="buttonTest" type="submit" data-theme="a">Test Connection</button>		
+			</div>
+		</form>	
+	</div>
+</div>
+
+</body>
+</html>
